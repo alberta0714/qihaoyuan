@@ -1,0 +1,13 @@
+@charset "utf-8";
+/* CSS Document */
+*{margin:0;padding:0; font-size:12px;}
+h1,h2,h3,h4,h5,h6{font-weight:normal;font-size:12px;}
+b,strong{font-weight:normal;}
+i,em{font-style:normal;}
+a{text-decoration:none;}
+ul,ol,dl{list-style:none;}
+a img{border:0;}
+.clearfix:after{display:block;content:""; clear:both;}
+
+.bd{border:1px solid #ccc;}
+.pd10{padding:10px;}
