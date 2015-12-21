@@ -3,13 +3,31 @@
 	xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>Archetype Created Web Application</display-name>
+	<filter>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 	<servlet>
-		<servlet-name>TestServlet</servlet-name>
-		<servlet-class>com.alberta0714.qihaoyuan.TestServlet</servlet-class>
+		<servlet-name>IndexMgr</servlet-name>
+		<servlet-class>com.alberta0714.qihaoyuan.admin.actions.IndexMgrAction</servlet-class>
 	</servlet>
 
+
 	<servlet-mapping>
-		<servlet-name>TestServlet</servlet-name>
-		<url-pattern>/t</url-pattern>
+		<servlet-name>IndexMgr</servlet-name>
+		<url-pattern>/actions/indexMgrAction</url-pattern>
 	</servlet-mapping>
 </web-app>

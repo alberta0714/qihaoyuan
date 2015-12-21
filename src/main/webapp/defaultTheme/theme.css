@@ -7,7 +7,7 @@
 .crate ul li:after{display:block; content:""; clear:both;}
 .crate span,input{float:left; display:block;}
 .crate span{width:100px; text-align:right;padding-right:4px;}
-.crate button{float:right;padding:0px 50px;}
+.crate button,.bn{float:right;padding:0px 50px;}
 
 .mleft,.main{float:left;}
 .mleft{width:100px;background:#f3f3f3;min-height:100px;padding:20px;}
