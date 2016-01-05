@@ -8,7 +8,7 @@ public class MsgBean implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	Map<String, Object> msgs = new HashMap<String, Object>();
-	String error = "error";
+	String error = null;
 
 	public String getError() {
 		return error;

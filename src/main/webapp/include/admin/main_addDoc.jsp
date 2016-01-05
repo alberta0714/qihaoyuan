@@ -1,5 +1,6 @@
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%><%@include
-	file="/include/base.jsp"%>
+	file="/include/base.jsp"%><%@page
+ import="com.alberta0714.qihaoyuan.IndexDir" %>
 <div class="crate">
 	<div class="title">
 		添加文档

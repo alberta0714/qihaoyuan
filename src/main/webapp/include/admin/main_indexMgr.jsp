@@ -1,17 +1,17 @@
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%><%@include
-	file="/include/base.jsp"%>
+	file="/include/base.jsp"%><%@ page import="com.alberta0714.common.lucene.IndexServices,com.alberta0714.common.lucene.IndexServices.IndexInfo" %>
 <link rel="stylesheet" href="${basePath}defaultTheme/indexMgr.css"
 	type="text/css"></link>
 <div class="crate createIndexDir">
-	<form action="${basePath}actions/indexMgrAction" method="post">
+	<form action="${basePath}actions/indexMgrAction?isRedirect=true" method="post">
 		<div class="title">
 			创建索引仓库
 		</div>
 		<ul>
 			<li>
 				<span>仓库索引目录:</span>
-				<input type="text" value="D:\qihaoyuanData\index"
-					style="width: 594px;" class="indexDir" name="indexDir" />
+				<input type="text" value="qihaoyuan"
+					style="width: 594px;" class="indexName" name="indexName" />
 				<input type="hidden" name="m" value="createIndexDir" />
 			</li>
 			<li>
@@ -39,76 +39,28 @@
 				操作
 			</li>
 		</ul>
+		<%
+			List<IndexInfo> list = IndexServices.inst().showIndexList();
+			for(int i = 0 ; i < list.size(); i++){
+				IndexInfo info = list.get(i);
+		%>	
 		<ul class="clearfix">
 			<li class="r1">
-				&nbsp;
+				<%=info.getName()%>
 			</li>
 			<li class="r2">
-				&nbsp;
+				<%=info.getIndexPath()%>
 			</li>
 			<li class="r3">
-				&nbsp;
+				<%=info.getMaxDocNum()%>
 			</li>
 			<li class="r4">
-				详情|删除
+				删除
 			</li>
 		</ul>
-		<ul class="clearfix">
-			<li class="r1">
-				&nbsp;
-			</li>
-			<li class="r2">
-				&nbsp;
-			</li>
-			<li class="r3">
-				&nbsp;
-			</li>
-			<li class="r4">
-				&nbsp;
-			</li>
-		</ul>
-		<ul class="clearfix">
-			<li class="r1">
-				&nbsp;
-			</li>
-			<li class="r2">
-				&nbsp;
-			</li>
-			<li class="r3">
-				&nbsp;
-			</li>
-			<li class="r4">
-				&nbsp;
-			</li>
-		</ul>
-		<ul class="clearfix">
-			<li class="r1">
-				&nbsp;
-			</li>
-			<li class="r2">
-				&nbsp;
-			</li>
-			<li class="r3">
-				&nbsp;
-			</li>
-			<li class="r4">
-				&nbsp;
-			</li>
-		</ul>
-		<ul class="clearfix">
-			<li class="r1">
-				&nbsp;
-			</li>
-			<li class="r2">
-				&nbsp;
-			</li>
-			<li class="r3">
-				&nbsp;
-			</li>
-			<li class="r4">
-				&nbsp;
-			</li>
-		</ul>
+		<%	
+			}
+		%>
 	</div>
 </div>
 
