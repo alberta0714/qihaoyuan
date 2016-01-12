@@ -4,17 +4,11 @@ import static com.alberta0714.common.lucene.IndexUtilsAlber.VERSION;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
@@ -57,57 +51,18 @@ public class IndexServices {
 		return indexList;
 	}
 
+	public IndexWriter createIndexWriter(String name) throws IOException {
+		IndexWriter iw = null;
+		Analyzer analyzer = new StandardAnalyzer(IndexUtilsAlber.VERSION);
+		IndexWriterConfig iwConf = new IndexWriterConfig(IndexUtilsAlber.VERSION, analyzer);
+		iwConf.setOpenMode(OpenMode.APPEND);
+		iw = new IndexWriter(FSDirectory.open(new File(IndexUtilsAlber.baseIndexPath, name)), iwConf);
+		return iw;
+	}
+	
+	
+
 	public static void main(String[] args) {
 		inst().showIndexList();
-	}
-
-	public class IndexInfo implements Serializable {
-		private static final long serialVersionUID = 1L;
-		private String name = "";
-		private String indexPath;
-		private double fileSize = 0l;
-		private int maxDocNum = -1;
-
-		public IndexInfo(String name) {
-			this.name = name;
-			File indexDir = new File(IndexUtilsAlber.baseIndexPath, name);
-			indexPath = indexDir.getAbsolutePath();
-
-			long length = indexDir.length();
-			BigDecimal size = new BigDecimal(length);
-			if (0 != length) {
-				size = size.divide(new BigDecimal(1024 * 1024));
-			}
-			size.setScale(2, RoundingMode.HALF_UP);
-			fileSize = size.doubleValue();
-
-			try {
-				IndexReader ir = DirectoryReader.open(FSDirectory.open(indexDir));
-				maxDocNum = ir.maxDoc();
-			} catch (IOException e) {
-				logger.error("", e);
-			}
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getIndexPath() {
-			return indexPath;
-		}
-
-		public int getMaxDocNum() {
-			return maxDocNum;
-		}
-
-		public double getFileSize() {
-			return fileSize;
-		}
-
-		@Override
-		public String toString() {
-			return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		}
 	}
 }

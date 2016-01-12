@@ -5,7 +5,7 @@
 .crate .title{font-size:14px; border-bottom:1px dotted #ccc;}
 .crate ul li{padding:6px 0px;}
 .crate ul li:after{display:block; content:""; clear:both;}
-.crate span,input{float:left; display:block;}
+.crate span,input,select{float:left; display:block;}
 .crate span{width:100px; text-align:right;padding-right:4px;}
 .crate button,.bn{float:right;padding:0px 50px;}
 
@@ -23,3 +23,5 @@
 
 
 
+.bn{padding:2px 10px;border:1px #ccc solid; margin:4px;}
+.bn:hover{cursor:pointer;border:1px yellow solid;}

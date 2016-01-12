@@ -1,5 +1,5 @@
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%><%@include
-	file="/include/base.jsp"%><%@ page import="com.alberta0714.common.lucene.IndexServices,com.alberta0714.common.lucene.IndexServices.IndexInfo" %>
+	file="/include/base.jsp"%><%@ page import="com.alberta0714.common.lucene.IndexServices,com.alberta0714.common.lucene.IndexInfo" %>
 <link rel="stylesheet" href="${basePath}defaultTheme/indexMgr.css"
 	type="text/css"></link>
 <div class="crate createIndexDir">
