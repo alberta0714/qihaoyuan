@@ -1,5 +1,5 @@
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%><%@include
-	file="/include/base.jsp"%><%@ page import="com.alberta0714.common.lucene.IndexServices,com.alberta0714.common.lucene.IndexInfo" %>
+	file="/include/base.jsp"%><%@ page import="com.alberta0714.common.lucene.IndexServices,com.alberta0714.common.lucene.IndexInfo,com.alberta0714.common.Constant,java.io.*" %>
 <link rel="stylesheet" href="${basePath}defaultTheme/indexMgr.css"
 	type="text/css"></link>
 <div class="crate createIndexDir">
@@ -17,6 +17,7 @@
 			<li>
 				<input type="submit" value="创建" class="bn" />
 			</li>
+			<li>索引根目录：<%=Constant.BASEDIR.getAbsolutePath()%></li>
 		</ul>
 	</form>
 </div>

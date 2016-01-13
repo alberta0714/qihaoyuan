@@ -6,4 +6,4 @@
 <h2>Hello World!</h2>
 </body>
 </html>
-<a target="_blank" href="${basePath}admin">admin</a>
+<a target="_blank" href="${basePath}admin/admin.jsp">admin</a>

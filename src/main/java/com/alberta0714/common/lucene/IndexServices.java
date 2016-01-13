@@ -44,6 +44,10 @@ public class IndexServices {
 
 	public List<IndexInfo> showIndexList() {
 		List<IndexInfo> indexList = new ArrayList<IndexInfo>();
+		if(!IndexUtilsAlber.baseIndexPath.exists()){
+			IndexUtilsAlber.baseIndexPath.mkdirs();
+			return indexList;
+		}
 		for (File file : IndexUtilsAlber.baseIndexPath.listFiles()) {
 			IndexInfo index = new IndexInfo(file.getName());
 			indexList.add(index);

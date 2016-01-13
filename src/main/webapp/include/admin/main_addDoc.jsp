@@ -10,10 +10,18 @@
 		</div>
 		<ul>
 			<li>
+				<%
+					List<IndexInfo> indexList = IndexServices.inst().showIndexList();
+					if (null == indexList || 0 == indexList.size()) {
+				%>
+					<div>没有索引库。请先<a href="${basePath}admin/indexMgr.jsp" target="_self">创建索引库</a></div>
+				<%
+						return;
+					}
+				%>
 				<span>选择索引库</span>
 				<select name="indexName">
 					<%
-						List<IndexInfo> indexList = IndexServices.inst().showIndexList();
 						for (IndexInfo index : indexList) {
 					%>
 						<option value="<%=index.getName()%>" selected="">
