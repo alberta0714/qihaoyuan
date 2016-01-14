@@ -1,5 +1,6 @@
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%><%@include
-	file="/include/base.jsp"%><%@ page import="com.alberta0714.common.lucene.IndexServices,com.alberta0714.common.lucene.IndexInfo,com.alberta0714.common.Constant,java.io.*" %>
+	file="/include/base.jsp"%>
+<%@ page import="com.alberta0714.common.lucene.IndexDao,com.alberta0714.common.lucene.IndexInfo,com.alberta0714.common.Constant,java.io.*" %>
 <link rel="stylesheet" href="${basePath}defaultTheme/indexMgr.css"
 	type="text/css"></link>
 <div class="crate createIndexDir">
@@ -41,7 +42,7 @@
 			</li>
 		</ul>
 		<%
-			List<IndexInfo> list = IndexServices.inst().showIndexList();
+			List<IndexInfo> list = IndexDao.inst().showIndexList();
 			for(int i = 0 ; i < list.size(); i++){
 				IndexInfo info = list.get(i);
 		%>	

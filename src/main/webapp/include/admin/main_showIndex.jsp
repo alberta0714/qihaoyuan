@@ -1,10 +1,8 @@
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%><%@include
-	file="/include/base.jsp"%><%@ page
-	import="com.alberta0714.common.lucene.IndexServices,com.alberta0714.common.lucene.IndexInfo,com.alberta0714.common.Constant,java.io.*"%>
-<link rel="stylesheet" href="${basePath}defaultTheme/indexMgr.css"
+	file="/include/base.jsp"%><link rel="stylesheet" href="${basePath}defaultTheme/indexMgr.css"
 	type="text/css"></link>
 <div class="crate">
-	<div class="title">
+	<div class="title b">
 		索引库信息
 	</div>
 	<div id="info_1" class="clearfix"></div>
@@ -25,7 +23,7 @@
 		</ul>
 	</div>
 	<div class="title mt10">
-		文档列表(单击记录，查看字段名)
+		<span class="b">文档列表</span><span class="tips ml10 gray">(单击序号，可查看字段名)</span>
 	</div>
 	<div id="info_2">&nbsp;#info_2</div>
 	<div class="rtb" name="docList">

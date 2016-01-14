@@ -11,7 +11,7 @@
 		<ul>
 			<li>
 				<%
-					List<IndexInfo> indexList = IndexServices.inst().showIndexList();
+					List<IndexInfo> indexList = IndexDao.inst().showIndexList();
 					if (null == indexList || 0 == indexList.size()) {
 				%>
 					<div>没有索引库。请先<a href="${basePath}admin/indexMgr.jsp" target="_self">创建索引库</a></div>
@@ -33,7 +33,7 @@
 				</select>
 			</li>
 			<li class="bd pd10">
-				<ul id="fieldinfolist">
+				<ul id="fieldinfolist" class="fieldinfolist">
 					
 				</ul>
 				<ul>
@@ -64,7 +64,7 @@
 					}
 				%>
 			</select>
-			<div class="bn" style="margin-top:-6px;" name="delRow">删除</div>
+			<div class="bn" style="margin-top:-4px;" name="delRow">删除</div>
 		</li>
 	</div>
 	<script type="text/javascript" src="../defaultTheme/js/admin/main_addDoc.js"></script>
