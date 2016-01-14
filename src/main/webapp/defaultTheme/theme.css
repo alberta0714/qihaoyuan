@@ -11,7 +11,7 @@
 
 .mleft,.main{float:left;}
 .mleft{width:100px;background:#f3f3f3;min-height:100px;padding:20px;}
-.mleft ul li,a{ font-size:16px;line-height:32px;}
+.mleft ul li,.mleft a{ font-size:16px;line-height:32px;}
 
 .ptop{height:100px;}
 
@@ -20,8 +20,10 @@
 .rtb ul li{float:left;line-height:24px;padding:0px 10px;border-left:1px solid #ccc;}
 .rtb ul{border-top:1px solid #ccc;}
 .rtb .rtb_title{font-weight:700; text-align:center;}
+.rtb a{font-size:12px;  line-height:24px;}
 
 
 
 .bn{padding:2px 10px;border:1px #ccc solid; margin:4px;}
 .bn:hover{cursor:pointer;border:1px yellow solid;}
+

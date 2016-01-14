@@ -56,7 +56,7 @@
 				<%=info.getMaxDocNum()%>
 			</li>
 			<li class="r4">
-				删除
+				删除&nbsp;<a href="./showIndex.jsp?indexName=<%=info.getName()%>">查看</a>
 			</li>
 		</ul>
 		<%	

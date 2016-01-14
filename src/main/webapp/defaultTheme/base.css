@@ -11,6 +11,9 @@ a img{border:0;}
 
 .bd{border:1px solid #ccc;}
 .pd10{padding:10px;}
+.mt10{margin-top:10px;}
 
 .textalign_Left{text-align: left;}
 .textalign_centern{text-align: center;}
+
+.fz12{font-size:12px;}
