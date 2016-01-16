@@ -71,13 +71,13 @@ $(function(){
 				r += "</ul>";
 				// 显示字段内容
 				r += "<ul class=\"clearfix fieldValues\">";
-				r += "	<li style=\"width:30px;text-align:center; overflow:hidden;\" class=\"docId\">";
+				r += "	<li style=\"min-width:24px;text-align:center;overflow:hidden;\" class=\"docId\">";
 				r += doc;
 				r += "	</li>";
 				
 				for(var j = 0; j<fieldsInfos.length; j++){
 					var info = fieldsInfos[j];
-					r += "	<li style=\"width:60px;overflow:hidden;\">";
+					r += "	<li style=\"max-width:100px;overflow:hidden; height:24px;\">";
 					r += info.stringValue
 					r += "	</li>";
 				}

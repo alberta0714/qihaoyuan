@@ -31,8 +31,8 @@ public class IndexMgrAction extends HttpServlet {
 		boolean isRedirect = BooleanUtils.toBoolean(request.getParameter("isRedirect"));
 
 		MsgBean msg = new MsgBean();
-		msg.getMsgs().put("m", M.SHOWDOCUMENTS);
-		msg.getMsgs().put("isRedirect", M.SHOWDOCUMENTS);
+		msg.getMsgs().put("m", method);
+		msg.getMsgs().put("isRedirect", isRedirect);
 		M m = null;
 		try {
 			m = M.valueOf(method.toUpperCase());
@@ -48,7 +48,7 @@ public class IndexMgrAction extends HttpServlet {
 				mgrService.addDocument(request, response, isRedirect, msg);
 				break;
 			}
-			case CREATINDEXDIR: {
+			case CREATEINDEXDIR: {
 				mgrService.createIndex(request, response, isRedirect, msg);
 				break;
 			}
@@ -69,7 +69,7 @@ public class IndexMgrAction extends HttpServlet {
 	}
 
 	enum M {
-		CREATINDEXDIR("createIndexDir"), //
+		CREATEINDEXDIR("createIndexDir"), //
 		SHOWINDEXES("showIndexes"), //
 		ADDDOCUMENT("addDocument"), //
 		SHOWDOCUMENTS("showDocuments");
