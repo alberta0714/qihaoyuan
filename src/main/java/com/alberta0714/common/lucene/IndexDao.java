@@ -17,12 +17,21 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.facet.index.FacetFields;
+import org.apache.lucene.facet.taxonomy.CategoryPath;
+import org.apache.lucene.facet.taxonomy.TaxonomyReader;
+import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +40,8 @@ import com.alberta0714.qihaoyuan.lucene.DocumentInfo;
 import com.alberta0714.qihaoyuan.lucene.FieldInfo;
 
 public class IndexDao {
-	private static final Logger logger = LoggerFactory.getLogger(IndexDao.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(IndexDao.class);
 
 	private static IndexDao service = new IndexDao();
 
@@ -43,16 +53,25 @@ public class IndexDao {
 	}
 
 	public boolean createIndex(String name, OpenMode mode) throws IOException {
+		// TODO 详细的验证
 		File indexPath = new File(IndexUtilsAlber.baseIndexPath, name);
 		if (indexPath.exists()) {
 			throw new RuntimeException("不能重复创建索引目录!");
 		}
 		logger.debug("createindex dir ({})", indexPath.getAbsolutePath());
-		IndexWriterConfig ixConf = new IndexWriterConfig(VERSION, new StandardAnalyzer(VERSION));
+
+		// init indexDir
+		IndexWriterConfig ixConf = new IndexWriterConfig(VERSION,
+				new StandardAnalyzer(VERSION));
 		ixConf.setOpenMode(mode);
 		IndexWriter iw = new IndexWriter(this.getFSIndexDirectory(name), ixConf);
+		DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(
+				this.getFSTaxoIndexDirectory(name), OpenMode.CREATE);
 
+		taxoWriter.commit();
+		iw.commit();
 		iw.close();
+		taxoWriter.close();
 		return true;
 	}
 
@@ -72,7 +91,8 @@ public class IndexDao {
 	public IndexWriter createIndexWriter(String name) throws IOException {
 		IndexWriter iw = null;
 		Analyzer analyzer = new StandardAnalyzer(IndexUtilsAlber.VERSION);
-		IndexWriterConfig iwConf = new IndexWriterConfig(IndexUtilsAlber.VERSION, analyzer);
+		IndexWriterConfig iwConf = new IndexWriterConfig(
+				IndexUtilsAlber.VERSION, analyzer);
 		iwConf.setOpenMode(OpenMode.APPEND);
 		iw = new IndexWriter(getFSIndexDirectory(name), iwConf);
 		return iw;
@@ -115,20 +135,37 @@ public class IndexDao {
 		return fdInfos;
 	}
 
-	private FSDirectory getFSIndexDirectory(String indexName) throws IOException {
-		FSDirectory dir;
-		dir = FSDirectory.open(new File(IndexUtilsAlber.baseIndexPath, indexName));
+	private FSDirectory getFSIndexDirectory(String indexName)
+			throws IOException {
+		File indexDataDir = new File(IndexUtilsAlber.baseIndexPath, indexName);
+		File indexDir = new File(indexDataDir, "index");
+		return FSDirectory.open(indexDir);
+	}
+
+	private FSDirectory getFSTaxoIndexDirectory(String indexName)
+			throws IOException {
+		File indexDataDir = new File(IndexUtilsAlber.baseIndexPath, indexName);
+		File taxoDir = new File(indexDataDir, "taxo");
+		FSDirectory dir = FSDirectory.open(taxoDir);
 		return dir;
 	}
 
-	public void addDocument(String indexName, String[] fdNames, String[] fdContents, String[] fdTypes) throws IOException {
+	public void addDocument(String indexName, String[] fdNames,
+			String[] fdContents, String[] fdTypes) throws IOException {
 		IndexWriter iw = null;
+		TaxonomyWriter taxoWriter = null;
 		Document doc = new Document();
 		try {
 			iw = IndexDao.inst().createIndexWriter(indexName);
+			// Writes facet ords to a separate directory from the main index
+			taxoWriter = new DirectoryTaxonomyWriter(
+					this.getFSTaxoIndexDirectory(indexName), OpenMode.APPEND);
 			if (null == fdNames) {
 				// TODO verify it
 			}
+			List<CategoryPath> paths = new ArrayList<CategoryPath>();
+			// Reused across documents, to add the necessary facet fields
+			FacetFields facetFields = new FacetFields(taxoWriter);
 			for (int i = 0; i < fdNames.length; i++) {
 				Field fd = null;
 				String name = fdNames[i];
@@ -148,16 +185,23 @@ public class IndexDao {
 					break;
 				}
 				}
+				paths.add(new CategoryPath(name, value));
 			}
 			if (0 != doc.getFields().size()) {
 				iw.addDocument(doc);
+				facetFields.addFields(doc, paths);
+				// FIXME http://www.cnblogs.com/huangfox/p/4177848.html
+
 			}
+			taxoWriter.commit();
+			iw.commit();
 			logger.debug("add to index({}),doc({}) ok!", indexName, doc);
 		} finally {
 			IOUtils.closeQuietly(iw);
+			IOUtils.closeQuietly(taxoWriter);
 		}
 	}
-	
+
 	/**
 	 * TODO
 	 * 
@@ -166,8 +210,9 @@ public class IndexDao {
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean deleteDocument(String indexName, Query query) throws IOException {
-		
+	private boolean deleteDocument(String indexName, Query query)
+			throws IOException {
+
 		return false;
 	}
 
@@ -179,13 +224,28 @@ public class IndexDao {
 	 * @return
 	 * @throws IOException
 	 */
-	private List<DocumentInfo> queryIndex(String indexName, Query query) throws IOException {
-		
+	private List<DocumentInfo> queryIndex(String indexName, Query query)
+			throws IOException {
+
 		return null;
 	}
 
 	public static void main(String[] args) throws Exception {
 		// inst().showIndexList();
 		inst().showDocument("qihaoyuan");
+		String indexName = "qihaoyuan";
+
+		IndexReader ir = DirectoryReader.open(inst().getFSIndexDirectory(
+				indexName));
+
+		IndexSearcher searcher = new IndexSearcher(ir);
+		TaxonomyReader taxoReader = new DirectoryTaxonomyReader(inst()
+				.getFSTaxoIndexDirectory(indexName));
+
+		TermQuery q = new TermQuery(new Term("category", "Novel"));
+		// http://www.cnblogs.com/huangfox/p/4177750.html
+
+		taxoReader.close();
+		searcher.getIndexReader().close();
 	}
 }
