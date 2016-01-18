@@ -29,10 +29,13 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.LogDocMergePolicy;
+import org.apache.lucene.index.MergePolicy;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.FSDirectory;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +43,7 @@ import com.alberta0714.qihaoyuan.lucene.DocumentInfo;
 import com.alberta0714.qihaoyuan.lucene.FieldInfo;
 
 public class IndexDao {
-	private static final Logger logger = LoggerFactory
-			.getLogger(IndexDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(IndexDao.class);
 
 	private static IndexDao service = new IndexDao();
 
@@ -61,12 +63,10 @@ public class IndexDao {
 		logger.debug("createindex dir ({})", indexPath.getAbsolutePath());
 
 		// init indexDir
-		IndexWriterConfig ixConf = new IndexWriterConfig(VERSION,
-				new StandardAnalyzer(VERSION));
+		IndexWriterConfig ixConf = new IndexWriterConfig(VERSION, new StandardAnalyzer(VERSION));
 		ixConf.setOpenMode(mode);
 		IndexWriter iw = new IndexWriter(this.getFSIndexDirectory(name), ixConf);
-		DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(
-				this.getFSTaxoIndexDirectory(name), OpenMode.CREATE);
+		DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(this.getFSTaxoIndexDirectory(name), OpenMode.CREATE);
 
 		taxoWriter.commit();
 		iw.commit();
@@ -91,9 +91,9 @@ public class IndexDao {
 	public IndexWriter createIndexWriter(String name) throws IOException {
 		IndexWriter iw = null;
 		Analyzer analyzer = new StandardAnalyzer(IndexUtilsAlber.VERSION);
-		IndexWriterConfig iwConf = new IndexWriterConfig(
-				IndexUtilsAlber.VERSION, analyzer);
+		IndexWriterConfig iwConf = new IndexWriterConfig(IndexUtilsAlber.VERSION, analyzer);
 		iwConf.setOpenMode(OpenMode.APPEND);
+		// iwConf.setMergePolicy(new LogDocMergePolicy());
 		iw = new IndexWriter(getFSIndexDirectory(name), iwConf);
 		return iw;
 	}
@@ -135,31 +135,27 @@ public class IndexDao {
 		return fdInfos;
 	}
 
-	private FSDirectory getFSIndexDirectory(String indexName)
-			throws IOException {
+	private FSDirectory getFSIndexDirectory(String indexName) throws IOException {
 		File indexDataDir = new File(IndexUtilsAlber.baseIndexPath, indexName);
 		File indexDir = new File(indexDataDir, "index");
 		return FSDirectory.open(indexDir);
 	}
 
-	private FSDirectory getFSTaxoIndexDirectory(String indexName)
-			throws IOException {
+	private FSDirectory getFSTaxoIndexDirectory(String indexName) throws IOException {
 		File indexDataDir = new File(IndexUtilsAlber.baseIndexPath, indexName);
 		File taxoDir = new File(indexDataDir, "taxo");
 		FSDirectory dir = FSDirectory.open(taxoDir);
 		return dir;
 	}
 
-	public void addDocument(String indexName, String[] fdNames,
-			String[] fdContents, String[] fdTypes) throws IOException {
+	public void addDocument(String indexName, String[] fdNames, String[] fdContents, String[] fdTypes) throws IOException {
 		IndexWriter iw = null;
 		TaxonomyWriter taxoWriter = null;
 		Document doc = new Document();
 		try {
 			iw = IndexDao.inst().createIndexWriter(indexName);
 			// Writes facet ords to a separate directory from the main index
-			taxoWriter = new DirectoryTaxonomyWriter(
-					this.getFSTaxoIndexDirectory(indexName), OpenMode.APPEND);
+			taxoWriter = new DirectoryTaxonomyWriter(this.getFSTaxoIndexDirectory(indexName), OpenMode.APPEND);
 			if (null == fdNames) {
 				// TODO verify it
 			}
@@ -187,19 +183,30 @@ public class IndexDao {
 				}
 				paths.add(new CategoryPath(name, value));
 			}
+
 			if (0 != doc.getFields().size()) {
+				addMustedFields(doc);
+
 				iw.addDocument(doc);
 				facetFields.addFields(doc, paths);
 				// FIXME http://www.cnblogs.com/huangfox/p/4177848.html
-
 			}
 			taxoWriter.commit();
+			iw.forceMerge(1);
 			iw.commit();
 			logger.debug("add to index({}),doc({}) ok!", indexName, doc);
 		} finally {
 			IOUtils.closeQuietly(iw);
 			IOUtils.closeQuietly(taxoWriter);
 		}
+	}
+
+	private void addMustedFields(Document doc) {
+		// 添加一些必要字段
+		StringField createTime = new StringField("createTime", new DateTime().toString("yyyy/MM/dd HH:mm:ss"), Store.YES);
+		doc.add(createTime);
+		StringField all = new StringField("all", "all", Store.YES);
+		doc.add(all);
 	}
 
 	/**
@@ -210,8 +217,7 @@ public class IndexDao {
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean deleteDocument(String indexName, Query query)
-			throws IOException {
+	private boolean deleteDocument(String indexName, Query query) throws IOException {
 
 		return false;
 	}
@@ -224,8 +230,7 @@ public class IndexDao {
 	 * @return
 	 * @throws IOException
 	 */
-	private List<DocumentInfo> queryIndex(String indexName, Query query)
-			throws IOException {
+	private List<DocumentInfo> queryIndex(String indexName, Query query) throws IOException {
 
 		return null;
 	}
@@ -235,12 +240,10 @@ public class IndexDao {
 		inst().showDocument("qihaoyuan");
 		String indexName = "qihaoyuan";
 
-		IndexReader ir = DirectoryReader.open(inst().getFSIndexDirectory(
-				indexName));
+		IndexReader ir = DirectoryReader.open(inst().getFSIndexDirectory(indexName));
 
 		IndexSearcher searcher = new IndexSearcher(ir);
-		TaxonomyReader taxoReader = new DirectoryTaxonomyReader(inst()
-				.getFSTaxoIndexDirectory(indexName));
+		TaxonomyReader taxoReader = new DirectoryTaxonomyReader(inst().getFSTaxoIndexDirectory(indexName));
 
 		TermQuery q = new TermQuery(new Term("category", "Novel"));
 		// http://www.cnblogs.com/huangfox/p/4177750.html

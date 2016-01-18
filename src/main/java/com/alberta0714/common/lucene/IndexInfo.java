@@ -25,7 +25,7 @@ public class IndexInfo implements Serializable {
 
 	public IndexInfo(String name) {
 		this.name = name;
-		File indexDir = new File(IndexUtilsAlber.baseIndexPath, name);
+		File indexDir = new File(new File(IndexUtilsAlber.baseIndexPath, name), "index");
 		indexPath = indexDir.getAbsolutePath();
 
 		long length = indexDir.length();

@@ -4,7 +4,7 @@ var randomA = 65
 var random1 = 1;
 $(function(){
 	$("#bn_addrow").click(function(){
-		$("#fieldRowContent input[name=fdName]").attr("value",String.fromCharCode(randomA++) + getRandomLowerString(3));
+		$("#fieldRowContent input[name=fdName]").attr("value",String.fromCharCode(randomA++));
 		$("#fieldRowContent input[name=fdContent]").attr("value",(random1++) + getRandomLowerString(10));
 		$("#fieldinfolist").append($("#fieldRowContent").html());
 		addDelClick();
