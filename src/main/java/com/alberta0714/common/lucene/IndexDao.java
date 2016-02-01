@@ -18,6 +18,10 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.facet.index.FacetFields;
+import org.apache.lucene.facet.params.FacetSearchParams;
+import org.apache.lucene.facet.search.CountFacetRequest;
+import org.apache.lucene.facet.search.FacetResult;
+import org.apache.lucene.facet.search.FacetsCollector;
 import org.apache.lucene.facet.taxonomy.CategoryPath;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
@@ -29,11 +33,11 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.index.LogDocMergePolicy;
-import org.apache.lucene.index.MergePolicy;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MultiCollector;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.FSDirectory;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -181,15 +185,15 @@ public class IndexDao {
 					break;
 				}
 				}
-				paths.add(new CategoryPath(name, value));
+				paths.add(new CategoryPath(name + "/" + value));
 			}
 
 			if (0 != doc.getFields().size()) {
-				addMustedFields(doc);
+				addMustedFields(doc, paths);
 
 				iw.addDocument(doc);
 				facetFields.addFields(doc, paths);
-				// FIXME http://www.cnblogs.com/huangfox/p/4177848.html
+				// http://www.cnblogs.com/huangfox/p/4177848.html
 			}
 			taxoWriter.commit();
 			iw.forceMerge(1);
@@ -201,11 +205,15 @@ public class IndexDao {
 		}
 	}
 
-	private void addMustedFields(Document doc) {
+	private void addMustedFields(Document doc, List<CategoryPath> paths) {
 		// 添加一些必要字段
-		StringField createTime = new StringField("createTime", new DateTime().toString("yyyy/MM/dd HH:mm:ss"), Store.YES);
+		String datetime = new DateTime().toString("yyyy/MM/dd HH:mm:ss");
+		StringField createTime = new StringField("createTime", datetime, Store.YES);
+		paths.add(new CategoryPath("createTime/" + datetime));
 		doc.add(createTime);
+
 		StringField all = new StringField("all", "all", Store.YES);
+		paths.add(new CategoryPath("all/all"));
 		doc.add(all);
 	}
 
@@ -236,17 +244,29 @@ public class IndexDao {
 	}
 
 	public static void main(String[] args) throws Exception {
-		// inst().showIndexList();
-		inst().showDocument("qihaoyuan");
 		String indexName = "qihaoyuan";
-
-		IndexReader ir = DirectoryReader.open(inst().getFSIndexDirectory(indexName));
-
-		IndexSearcher searcher = new IndexSearcher(ir);
+		IndexSearcher searcher = new IndexSearcher(DirectoryReader.open(inst().getFSIndexDirectory(indexName)));
 		TaxonomyReader taxoReader = new DirectoryTaxonomyReader(inst().getFSTaxoIndexDirectory(indexName));
 
-		TermQuery q = new TermQuery(new Term("category", "Novel"));
 		// http://www.cnblogs.com/huangfox/p/4177750.html
+		// http://www.cnblogs.com/huangfox/p/4177848.html
+		// Count both "Publish Date" and "Author" dimensions
+		FacetSearchParams fsp = new FacetSearchParams(new CountFacetRequest(new CategoryPath("all"), 10));
+		// Aggregatses the facet counts
+		FacetsCollector fc = FacetsCollector.create(fsp, searcher.getIndexReader(), taxoReader);
+
+		// MatchAllDocsQuery is for "browsing" (counts facets
+		// for all non-deleted docs in the index); normally
+		// you'd use a "normal" query, and use MultiCollector to
+		// wrap collecting the "normal" hits and also facets:
+		TopScoreDocCollector tdc = TopScoreDocCollector.create(10, true);
+		searcher.search(new MatchAllDocsQuery(), MultiCollector.wrap(tdc, fc));
+		// Retrieve results
+		List<FacetResult> facetResults = fc.getFacetResults();
+
+		System.out.println("total hits:" + tdc.getTotalHits());
+		System.out.println("matchingDocs:" + fc.getMatchingDocs().size());
+		System.out.println(facetResults);
 
 		taxoReader.close();
 		searcher.getIndexReader().close();
