@@ -29,8 +29,6 @@ public class Listener implements ServletContextListener {
 		} catch (UnknownHostException e1) {
 			logger.error("", e1);
 		}
-		logger.info("");
-
 		logger.info(">>>> application start");
 		wt.reset().start();
 		if (!Constant.BASEDIR.exists()) {

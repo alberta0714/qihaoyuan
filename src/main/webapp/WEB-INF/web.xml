@@ -19,10 +19,19 @@
 		<servlet-name>IndexMgr</servlet-name>
 		<servlet-class>com.alberta0714.qihaoyuan.admin.actions.IndexMgrAction</servlet-class>
 	</servlet>
+  <servlet>
+    <servlet-name>RequestInfoAction</servlet-name>
+    <servlet-class>com.alberta0714.qihaoyuan.admin.actions.RequestInfoAction</servlet-class>
+  </servlet>
+
 
 
 	<servlet-mapping>
 		<servlet-name>IndexMgr</servlet-name>
 		<url-pattern>/actions/indexMgrAction</url-pattern>
 	</servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>RequestInfoAction</servlet-name>
+    <url-pattern>/info</url-pattern>
+  </servlet-mapping>
 </web-app>
