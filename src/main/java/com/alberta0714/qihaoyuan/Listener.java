@@ -2,6 +2,8 @@ package com.alberta0714.qihaoyuan;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -21,6 +23,14 @@ public class Listener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
+		try {
+			String ip = InetAddress.getLocalHost().getHostAddress();
+			logger.info("IP:{}", ip);
+		} catch (UnknownHostException e1) {
+			logger.error("", e1);
+		}
+		logger.info("");
+
 		logger.info(">>>> application start");
 		wt.reset().start();
 		if (!Constant.BASEDIR.exists()) {
@@ -39,7 +49,7 @@ public class Listener implements ServletContextListener {
 		// Specify the source where the template files come from. Here I set a
 		// plain directory for it, but non-file-system sources are possible too:
 		File templatesDir = new File(Constant.BASEDIR, "templates");
-		if(!templatesDir.exists()){
+		if (!templatesDir.exists()) {
 			templatesDir.mkdirs();
 		}
 		try {
