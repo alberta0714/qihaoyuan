@@ -12,14 +12,13 @@ import com.alberta0714.common.Constant;
 
 public class SpiderListMain {
 	public static final String userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0";
-	public static int max = 12538;
+	public static int min = 12695;
+	public static int max = min + 100;
 
 	public static void main(String[] args) throws InterruptedException {
 		// while (true) {
-		max = 122554;
-		int min = 122538;
 		String link = "http://www.85porn.me/media/albums/{id}.jpg";
-		for (int i = max; i > min; i--) {
+		for (int i = min; i < max; i++) {
 			String imgUrl = link.replace("{id}", Integer.toString(i));
 			System.out.println(imgUrl);
 			downLoad(imgUrl, i);
