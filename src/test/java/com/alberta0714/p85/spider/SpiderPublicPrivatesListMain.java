@@ -21,7 +21,7 @@ import org.jsoup.Jsoup;
 import com.alberta0714.common.Constant;
 
 public class SpiderPublicPrivatesListMain {
-	public static int min = 8000;
+	public static int min = 8933;
 	public static int max = min + 5000;
 
 	public static void main(String[] args) throws InterruptedException {
@@ -88,7 +88,6 @@ class Downloader implements Runnable {
 		} catch (SocketTimeoutException e) {
 			System.out.println("SocketTimeoutException " + imgUrl);
 		} catch (Exception e) {
-			ExceptionUtils.getRootCause(e).printStackTrace();
 			System.out.println("download error!" + imgUrl);
 		}
 	}
