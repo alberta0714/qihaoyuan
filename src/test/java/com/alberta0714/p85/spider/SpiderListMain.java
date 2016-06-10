@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
@@ -12,16 +14,18 @@ import com.alberta0714.common.Constant;
 
 public class SpiderListMain {
 	public static final String userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0";
-	public static int min = 12695;
-	public static int max = min + 100;
+	public static int min = 15567;// 113770 13747 105270
+	public static int max = min + 1000;
 
 	public static void main(String[] args) throws InterruptedException {
+		ExecutorService pool = Executors.newFixedThreadPool(50);
 		// while (true) {
 		String link = "http://www.85porn.me/media/albums/{id}.jpg";
 		for (int i = min; i < max; i++) {
 			String imgUrl = link.replace("{id}", Integer.toString(i));
 			System.out.println(imgUrl);
 			downLoad(imgUrl, i);
+			pool.execute(new Downloader(imgUrl, "imgs", i));
 		}
 		// }
 	}

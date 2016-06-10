@@ -2,27 +2,20 @@ package com.alberta0714.p85.spider;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 
 import com.alberta0714.common.Constant;
 
 public class SpiderPublicPrivatesListMain {
-	public static int min = 8933;
-	public static int max = min + 5000;
+	public static int min = 108322; // 105270
+	public static int max = min + 1000000;
 
 	public static void main(String[] args) throws InterruptedException {
 		ExecutorService pool = Executors.newFixedThreadPool(50);
@@ -31,7 +24,7 @@ public class SpiderPublicPrivatesListMain {
 		for (int i = min; i < max; i++) {
 			String imgUrl = link.replace("{id}", Integer.toString(i));
 			System.out.println(imgUrl);
-			pool.execute(new Downloader(imgUrl, i));
+			pool.execute(new Downloader(imgUrl, "privates", i));
 		}
 		pool.shutdown();
 	}
@@ -43,10 +36,12 @@ class Downloader implements Runnable {
 
 	private String url;
 	private int i;
+	private String dirName;
 
-	public Downloader(String url, int i) {
+	public Downloader(String url, String dirName, int i) {
 		this.url = url;
 		this.i = i;
+		this.dirName = dirName;
 	}
 
 	@Override
@@ -54,9 +49,10 @@ class Downloader implements Runnable {
 		this.downLoad(url, i);
 	}
 
-	private static void downLoad(String imgUrl, int i) {
+	private void downLoad(String imgUrl, int i) {
 		try {
-			File file = new File(Constant.BASEDIR, "privates");
+			// File file = new File(Constant.BASEDIR, "privates");
+			File file = new File(Constant.BASEDIR, dirName);
 			if (!file.exists()) {
 				file.mkdirs();
 			}
