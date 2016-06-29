@@ -4,10 +4,11 @@
 <html>
 <head>
 <title>hello</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 <link rel="stylesheet" href="sources/dist/style/weui.css" type="text/css"></link>
 <link rel="stylesheet" href="sources/dist/example/example.css" type="text/css"></link>
 </head>
-	<body>
+	<body ontouchstart>
 		<div class="home">
 			<div class="hd">
 				<h1 class="page_title">
