@@ -24,9 +24,6 @@
 							<h4 class="weui_media_title"><a target="_blank" href="${basePath}admin/admin.jsp">admin</a></h4>
 						</li>
 						<li>
-							<a target="_blank" href="${basePath}weixin_imgs/index.html">weixin_imgs</a>
-						</li>
-						<li>
 							<a target="_blank" href="${basePath}sources/dist/example/index.html">WE-UI</a>
 						</li>
 					</ul>
