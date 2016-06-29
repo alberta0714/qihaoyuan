@@ -7,6 +7,7 @@ pageContext.setAttribute("proName","qihaoyuan");
 <html>
 	<head>
 		<title>addIndex.html</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 		<meta http-equiv="keywords" content="创建索引">
 		<meta http-equiv="description" content="this is my page">
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">

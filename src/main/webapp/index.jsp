@@ -3,7 +3,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>hello</title>
+<title>联合七号院小区</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 <link rel="stylesheet" href="sources/dist/style/weui.css" type="text/css"></link>
 <link rel="stylesheet" href="sources/dist/example/example.css" type="text/css"></link>
@@ -15,7 +15,7 @@
 					Hello World!
 				</h1>
 				<p class="page_desc">
-					page description!
+					建设中...
 				</p>
 			</div>
 			<div class="bd">
