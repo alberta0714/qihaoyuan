@@ -14,7 +14,7 @@ import org.jsoup.Jsoup;
 import com.alberta0714.common.Constant;
 
 public class SpiderPublicPrivatesListMain {
-	public static int min = 108322; // 105270
+	public static int min = 207729; // 105270
 	public static int max = min + 1000000;
 
 	public static void main(String[] args) throws InterruptedException {
