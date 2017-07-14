@@ -1,7 +1,5 @@
 package com.alberta0714.qihaoyuan.test;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
