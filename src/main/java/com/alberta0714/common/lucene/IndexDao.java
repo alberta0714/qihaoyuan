@@ -217,27 +217,11 @@ public class IndexDao {
 		doc.add(all);
 	}
 
-	/**
-	 * TODO
-	 * 
-	 * @param indexName
-	 * @param query
-	 * @return
-	 * @throws IOException
-	 */
 	private boolean deleteDocument(String indexName, Query query) throws IOException {
 
 		return false;
 	}
 
-	/**
-	 * TODO
-	 * 
-	 * @param indexName
-	 * @param query
-	 * @return
-	 * @throws IOException
-	 */
 	private List<DocumentInfo> queryIndex(String indexName, Query query) throws IOException {
 
 		return null;

@@ -14,18 +14,32 @@ import com.google.common.collect.Lists;
 
 public class OrderingMain {
 	public static void main(String[] args) {
-		// config
-		Order order = new Order()
-				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("酸辣鸭血粉丝汤-中酸中辣", 30.9f))))//
+		/*
+		 * 多个同事订餐时,还在为 每个人应该优惠多少 而苦恼吗? 来执行这段程序吧!
+		 */
+		// suanCaiyu();
+		order(new Order()//
 				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("传统鸭血粉丝汤-不辣", 30.9f))))//
-				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("凉面+腊汁肉夹馍", 33.8f))));
-		double discounts = 41 + 7.5f;
+				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("传统鸭血粉丝汤-不辣", 30.9f))))//
+				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("凉面+线纯瘦肉夹馍-辣", 34.8f))))//
+				, 41 + 10// 优惠
+				, 6// 餐盒
+				, 3// 送餐费
+				, 0// 其它
+		);
+	}
 
-		double box = 6;
-		double shippingFee = 3;
-		double other = 0;
-		//
+	private static void suanCaiyu() {
+		order(new Order()//
+				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("酸菜鱼-无刺", 30.9f)// 继续添加单品
+				)))//
+				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("酸菜鱼-无刺", 30.9f)// 继续添加单品
+				)))//
+				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("酸菜鱼-无刺", 30.9f)// 继续添加单品
+		))), 53 + 7.5, 9, 5, 0);
+	}
 
+	private static void order(Order order, double discounts, double box, double shippingFee, double other) {
 		order.discounts = discounts;
 		order.shipping = box + shippingFee + other;
 
@@ -63,14 +77,19 @@ public class OrderingMain {
 				System.out
 						.println("\t - " + sku.getName() + "\t单价:" + sku.getMoney() + "元\t数量:" + sku.getCount() + "份");
 			}
-			System.out.println("- (原价:" + format(orderPerson.needToPay) + "元\t优惠:" + format(orderPerson.discounts)
-					+ "元\t餐盒,送餐:" + format(orderPerson.shippingFee) + "元)\t应付:" + format(orderPerson.finalPay) + "元");
+			System.out.println("- (原价:" + format(orderPerson.needToPay) + "元,优惠:" + format(orderPerson.discounts)
+					+ "元,其它:" + format(orderPerson.shippingFee) + "元)\t应付:" + format(orderPerson.finalPay) + "元");
 			jiaoyan += orderPerson.finalPay;
 		}
-		System.out.println("总金额:" + format(order.finalPrice) + "元\t已优惠:" + format(order.discounts) + "元\t餐盒送餐:"
-				+ format(order.shipping) + "元");
-		System.out.println("<校验:" + format(jiaoyan) + ">");
-
+		System.out.println("++++ 总金额:" + format(order.finalPrice) + "元\t(已优惠:" + format(order.discounts) + "元" //
+				+ ",送餐:" + format(shippingFee) + "元" //
+				+ ",餐盒:" + format(box) + "元" //
+				+ ",其它:" + format(other) + "元" //
+				+ ")");
+		System.out.println("<校验:" + format(jiaoyan) + ">(备:优惠根据支付占比,分配. 餐盒及配送费,均分)");
+		if (format(jiaoyan) != format(order.finalPrice)) {
+			System.err.println("校验错误!!");
+		}
 	}
 
 	public static double format(Double d) {

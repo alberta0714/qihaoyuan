@@ -14,13 +14,14 @@ import org.jsoup.Jsoup;
 import com.alberta0714.common.Constant;
 
 public class SpiderPublicPrivatesListMain {
-	public static int min = 207729; // 105270
+	public static int min = 254841;
 	public static int max = min + 1000000;
 
 	public static void main(String[] args) throws InterruptedException {
 		ExecutorService pool = Executors.newFixedThreadPool(50);
 
-		String link = "http://www.85porn.me/media/photos/tmb/{id}.jpg";
+		// String link = "http://www.85porn.me/media/photos/tmb/{id}.jpg";
+		String link = "";
 		for (int i = min; i < max; i++) {
 			String imgUrl = link.replace("{id}", Integer.toString(i));
 			System.out.println(imgUrl);
@@ -61,15 +62,10 @@ class Downloader implements Runnable {
 				return;
 			}
 
-			Response res = Jsoup
-					.connect(imgUrl)
-					.header("User-Agent", userAgent)
-					.header("Accept",
-							"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+			Response res = Jsoup.connect(imgUrl).header("User-Agent", userAgent)
+					.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 					.header("Accept-Encoding", "gzip, deflate")
-					.header("Accept-Language",
-							"zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3")
-					.header("Connection", "keep-alive")//
+					.header("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3").header("Connection", "keep-alive")//
 					// .header("Host", "www.85porn.me")//
 					.cookies(cookies)//
 					.ignoreContentType(true)//
