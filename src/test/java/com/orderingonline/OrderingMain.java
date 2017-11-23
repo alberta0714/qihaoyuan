@@ -29,6 +29,7 @@ public class OrderingMain {
 		);
 	}
 
+	@SuppressWarnings("unused")
 	private static void suanCaiyu() {
 		order(new Order()//
 				.addOrderPerson(new OrderPerson().setSkuList(Lists.newArrayList(new Sku("酸菜鱼-无刺", 30.9f)// 继续添加单品
