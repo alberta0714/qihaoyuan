@@ -7,10 +7,19 @@ import org.joda.time.PeriodType;
 public class BirthDayMain {
 
 	public static void main(String[] args) {
-		int a = showAge("2017-02-03");
-		int b = showAge("2017-12-16");
-		int diff = Math.abs(b - a);
-		System.out.println("年龄差：" + (diff / 365) + "岁  " + (diff % 365 / 30) + "个月  " + (diff % 365 % 30) + "天");
+		int a = showAge("2017-12-16"); // Jiayi
+
+		// int b = showAge("2016-09-30"); // ZhaoShandi
+		// int b = showAge("2016-02-12"); // MaJiayue M
+		// int b = showAge("2017-02-03"); // WangXiaoying Zyy
+		int b = showAge("2016-08-28"); // LiangYuanxi Chen
+
+		showDiff(a, b);
+	}
+
+	private static void showDiff(int a, int b) {
+		int diff = Math.abs(a - b);
+		System.out.println("年龄差：" + (diff / 365) + "岁 " + (diff % 365 / 30) + "个月 " + (diff % 365 % 30) + "天");
 	}
 
 	private static int showAge(String birth) {
