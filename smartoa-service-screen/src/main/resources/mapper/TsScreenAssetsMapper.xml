@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartoa.service.mapper.TsScreenAssetsMapper">
+  <resultMap id="BaseResultMap" type="com.smartoa.service.model.TsScreenAssets">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="type" jdbcType="CHAR" property="type" />
+    <result column="customers" jdbcType="INTEGER" property="customers" />
+    <result column="service_devices" jdbcType="INTEGER" property="serviceDevices" />
+    <result column="certification_servicers" jdbcType="INTEGER" property="certificationServicers" />
+    <result column="online_devices" jdbcType="INTEGER" property="onlineDevices" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+</mapper>

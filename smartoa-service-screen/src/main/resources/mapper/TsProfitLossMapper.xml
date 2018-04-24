@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartoa.service.mapper.TsProfitLossMapper">
+<select id="tsSerialNum2ModeList" resultType="map">
+select 
+  device.`device_serial_num`,
+  device.`device_model_dict_code`
+from
+  ab3.`tb_device` device 
+  left join ab3.`tb_product` pd on pd.`model`=device.`device_model_dict_code`
+</select>
+
+<select id="tsProfitLossDataList" resultType="com.smartoa.service.model.ts.TsProfitLoss">
+SELECT 
+  device.id as device_id,
+  device.device_name, -- * 设备名称
+  -- odditem.`name` AS item_name, -- 商品名称
+  bill.`sn` bill_sn, -- 账单编号
+  item.`ordersn` order_sn, -- 订单编号
+  odditem.`sn` AS device_sn, -- * 设备序号
+  member.username user_name,
+  cust.`cust_name`,
+  device.device_model_dict_code device_model, -- * 设备型号
+  item.`total_amount`, -- * 设备租金公式:    租金/(周期的月分数量)
+  item.start_date,
+  item.end_date, 
+  bill.coupon_paid_amount,
+  bill.order_coupon_discount,
+  -- item.`total_amount`-(od.coupon_discount/od.quantity) real_device_rent, -- 实付租金
+  -- bill.device_amount-IFNULL(bill.coupon_paid_amount,0) bill_real_rent,-- 账单应付/实付租金
+  (checklog.`paper_price`*checklog.`final_print` + checklog.`color_paper_price`*checklog.`color_final_print`) check_money,   -- *设备的抄表金额
+ -- item.`rent_process`, -- 租期
+ --  item.`pay_status`, -- 付款状态
+ -- bill.`paid_all`, -- 是否全付款
+ -- bill.`paid_amount`,-- 付款金额
+ -- (SELECT GROUP_CONCAT(as3.xx_bill_item.id)  FROM as3.xx_bill_item  WHERE as3.xx_bill_item.`bill`=item.`bill`) AS items, -- 具体统计项
+ -- bill.`paid_amount`/(SELECT COUNT(*)  FROM as3.xx_bill_item  WHERE as3.xx_bill_item.`bill`=item.`bill`) AS item_count, -- 平均在每台设备的实付租金(可能一次付多个周期)?
+ item.`modify_date` -- 付款日期 
+ -- ,bill.create_date bill_create_date
+ ,(SELECT as3.xx_order_item.`start_lease` FROM as3.xx_order_item WHERE as3.xx_order_item.`orders`=od.id LIMIT 1) AS start_lease -- 起租日  起租日, 若在当月, 则无安装费
+FROM
+  as3.xx_bill_item item -- 账单项, 记录了账单 相关的设备的  租期,租金情况
+  LEFT JOIN as3.xx_order_item_detail odditem  ON odditem.`id` = item.`order_item_detail`  --  详情
+  LEFT JOIN as3.`xx_bill` bill  ON bill.`id` = item.`bill` -- 账单 
+  LEFT JOIN as3.`xx_order_item` oditem  ON oditem.`id` = odditem.`item`  -- 订单项
+  LEFT JOIN as3.`xx_order` od  ON od.`id` = oditem.`orders`  -- 订单
+  LEFT JOIN as3.`xx_order_item_check_log` checklog ON checklog.`bill`=bill.`id` -- 记录了设备的抄表情况
+  LEFT JOIN ab3.`tb_device` device  ON device.device_serial_num=odditem.sn
+  LEFT JOIN ab3.`tb_product` pd ON pd.`model`=device.`device_model_dict_code`
+  LEFT JOIN ab3.`tb_product_class` clz ON clz.`id`=pd.`class_id`
+  LEFT JOIN as3.`xx_member` member ON member.`id`=bill.member
+  LEFT JOIN ab3.`tb_user` u ON u.`user_name`=member.`username`
+  LEFT JOIN ab3.`tb_cust` cust ON cust.`id`=u.`org_id`
+WHERE 1 = 1 
+  AND bill.sn IS NOT NULL 
+  -- 起租日后两个月内产生的账单,即为首期账单 
+  -- AND DATE_FORMAT(start_lease.start_lease,'%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(od.create_date, INTERVAL 2 MONTH),'%Y-%m-%d') 
+  -- AND DATE_FORMAT(item.modify_date, '%Y-%m')='2018-03'
+and item.`modify_date`>=#{startDate} -- * 选择最近3个月的账单  仅取出来上个月的结果
+-- ORDER BY item.`ordersn` ASC,odditem.`sn` ASC,item.`rent_process` ASC 
+</select>
+
+<select id="tsProfitLossDepreciationList" resultType="map">
+SELECT 
+  device.id device_id,
+  depri.`provision_money`,
+  depri.`standing_book_id`,
+  device.`device_serial_num`,
+  device.`device_model_dict_code`,
+  depri.`provision_date`
+FROM
+  `tb_depreciation_course_record` depri 
+  LEFT JOIN ab3.`tb_standing_book` stbk ON stbk.`id`=depri.`standing_book_id`
+  LEFT JOIN ab3.`tb_device` device  ON device.`id` = stbk.`device_id` 
+WHERE 1=1 
+  AND DATE_FORMAT(depri.`provision_date`, '%Y-%m')=#{month} -- 台账, 需要滞后1个月
+</select>
+
+<select id="tsProfitLossBillingDetail" resultType="map">
+SELECT 
+  bd.`model`,
+  bd.`install_price`, -- 安装费
+  bd.`service_price`, -- 服务费
+  bd.`product_price`, -- 当时的产品定价
+  bd.`balance_date` -- 结算日期
+FROM
+  ab3.`tb_billing_details` bd 
+WHERE 1=1
+  AND DATE_FORMAT(bd.balance_date, '%Y-%m')=#{month}
+</select>
+
+<select id="tsProfitLossPartsConsumables" resultType="map">
+SELECT  
+  device.id device_id, 
+  device.`device_model_dict_code` device_model,
+  device.`device_serial_num` device_sn,
+  lst.`parts_model`,
+  detail.`product_price`,
+  apply.`update_time`,
+  clz.`id` class_id,
+  clz.`class_name`
+FROM
+  ab3.`tb_device_parts_applied` lst 
+  LEFT JOIN ab3.`tb_device_parts_replace_apply` apply ON apply.`id`=lst.`tb_deceive_parts_replace_apply_id`
+  LEFT JOIN ab3.`tb_device` device ON device.`id`=apply.`tb_device_id`
+  LEFT JOIN ab3.`tb_billing_details` detail ON detail.`model`=lst.`parts_model`
+  left join ab3.`tb_product` pd on pd.`model`=lst.`parts_model`
+  left join ab3.`tb_product_class` clz on clz.`id`=pd.`class_id`
+WHERE 1=1 
+  AND apply.`audit_status` IN (2,4)
+  AND DATE_FORMAT(apply.update_time, '%Y-%m')=#{month}
+</select>
+
+<select id="tsProfitLossRecommended" resultType="map">
+SELECT 
+  rd.`order_no`,
+  rd.`reward_amount`,
+  rd.`order_date` 
+FROM
+  ab3.`tb_order_recommended_record` rd 
+WHERE 1=1
+  AND DATE_FORMAT(rd.`order_date`, '%Y-%m')=#{month}
+</select>
+
+
+</mapper>
