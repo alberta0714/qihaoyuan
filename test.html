@@ -1,0 +1,25 @@
+Hello world!
+
+<script>
+var toDate = '2018-05-23 17:30:00'; // 倒计时的时间
+
+function daoJiShi(callBack){
+	// TODO 可以在这里改变初始值
+	// ... 
+	setInterval(function(){
+		var dangQian = new Date();
+		var muBiao = new Date(toDate);
+		var xiangCha = muBiao - dangQian; 
+		var day = parseInt( xiangCha/1000/60/60/24);
+		var hour = parseInt(xiangCha/1000/60/60%24);
+		var minute = parseInt(xiangCha/1000/60%60);
+		var second = parseInt(xiangCha/1000%60);
+		callBack && callBack(day, hour, minute, second);
+	}, 1000);
+}
+daoJiShi (function(tian, xiaoshi, fenzhong, miao) {
+	console.log(tian, xiaoshi, fenzhong, miao);
+	document.write("1");
+});
+
+</script>

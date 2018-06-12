@@ -1,4 +1,4 @@
-package spider;
+package spider.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,7 +11,7 @@ public class JobLogUtils {
 
 	public JobLogUtils setJobName(String jobName) {
 		if (StringUtils.isNotEmpty(jobName)) {
-			this.jobName = "["+jobName+"]";
+			this.jobName = "【"+jobName+"】";
 		}
 		return this;
 	}

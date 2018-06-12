@@ -1,7 +1,8 @@
-package spider;
+package spider.utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
@@ -10,6 +11,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +27,8 @@ public class DownLoadUtils {
 	static File tmpDir = new File("D:\\tmp\\htmls");
 	static File imgDir = new File(tmpDir.getParentFile(), "imgs");
 
-	public DownLoadUtils() {
+	public DownLoadUtils(File tmpDirecory) {
+		tmpDir = tmpDirecory;
 	}
 
 	static {
@@ -31,8 +37,16 @@ public class DownLoadUtils {
 		Protocol.registerProtocol("https", myhttps);
 	}
 
+	public Document getHtmlDocumentWithCache(String itemUrl, Charset charset) {
+		return Jsoup.parse(this.getHtmlBodyWithCache(itemUrl, charset));
+	}
+
 	public String getHtmlBodyWithCache(String itemUrl, Charset charset) {
 		return getHtmlBodyWithCache(itemUrl, charset, false);
+	}
+
+	public Document getHtmlDocumentWithCache(String itemUrl, Charset charset, boolean overWrite) {
+		return Jsoup.parse(this.getHtmlBodyWithCache(itemUrl, charset, overWrite));
 	}
 
 	public String getHtmlBodyWithCache(String itemUrl, Charset charset, boolean overWrite) {
@@ -57,6 +71,11 @@ public class DownLoadUtils {
 		// } catch (IOException e) {
 		// e.printStackTrace();
 		// }
+		try {
+			return FileUtils.readFileToString(tmp, charset);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -125,7 +144,7 @@ public class DownLoadUtils {
 		String fileName = sUrl.substring(sUrl.lastIndexOf("/") + 1, sUrl.length());
 		File out = new File(fileName);
 
-		new DownLoadUtils().downLoadToTmpFile(sUrl, out, true);
+		new DownLoadUtils(new File("D:\\tmp\\htmls")).downLoadToTmpFile(sUrl, out, true);
 		logger.info("下载完毕:{}\t{}", out.getAbsolutePath(), wt);
 	}
 }
