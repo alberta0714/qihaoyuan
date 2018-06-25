@@ -11,7 +11,7 @@ public class JobLogUtils {
 
 	public JobLogUtils setJobName(String jobName) {
 		if (StringUtils.isNotEmpty(jobName)) {
-			this.jobName = "【"+jobName+"】";
+			this.jobName = "【" + jobName + "】";
 		}
 		return this;
 	}
@@ -32,12 +32,12 @@ public class JobLogUtils {
 
 	public JobLogUtils(String jobName, Class<?> clz) {
 		log = LoggerFactory.getLogger(clz);
-		this.jobName = "[" + jobName + "] ";
+		this.jobName = "【" + jobName + "】";
 	}
 
 	public JobLogUtils(Class<?> clz) {
 		log = LoggerFactory.getLogger(clz);
-		this.jobName = "[" + JobLogUtils.class.getName() + "] ";
+		this.jobName = "【" + clz.getName() + "】 ";
 	}
 
 	public void info(String format) {

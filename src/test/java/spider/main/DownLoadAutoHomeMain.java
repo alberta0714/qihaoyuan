@@ -21,6 +21,7 @@ public class DownLoadAutoHomeMain {
 				"https://jiage.autohome.com.cn/price/carlist/p-32456-1-0-0-110000-110100-1", Charset.forName("UTF-8"));
 
 		System.out.println(doc);
+		
 		logger.info("完成 {}", wt);
 	}
 }
