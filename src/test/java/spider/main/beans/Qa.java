@@ -1,6 +1,8 @@
 package spider.main.beans;
 
-public class Qa {
+public class Qa extends BaseBean {
+	private static final long serialVersionUID = -8206715510174835456L;
+	String link;
 	String patient, title, relatedDiseases, lastUpdate, lastUpdateBy;
 	String username, img, state, date, question;
 
@@ -84,9 +86,18 @@ public class Qa {
 		this.question = question;
 	}
 
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
 }
 
-class Ans {
+class Ans extends BaseBean {
+	private static final long serialVersionUID = 7118815161398177287L;
 	AnsType type;
 	String img, date, content;
 	String doc, level;
