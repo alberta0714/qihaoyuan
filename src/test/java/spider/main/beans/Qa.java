@@ -1,10 +1,14 @@
 package spider.main.beans;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Qa extends BaseBean {
 	private static final long serialVersionUID = -8206715510174835456L;
 	String link;
 	String patient, title, relatedDiseases, lastUpdate, lastUpdateBy;
 	String username, img, state, date, question;
+	List<Conversation> conversationList = new ArrayList<Conversation>();
 
 	public String getPatient() {
 		return patient;
@@ -94,80 +98,12 @@ public class Qa extends BaseBean {
 		this.link = link;
 	}
 
-}
-
-class Ans extends BaseBean {
-	private static final long serialVersionUID = 7118815161398177287L;
-	AnsType type;
-	String img, date, content;
-	String doc, level;
-	String patient, state;
-
-	enum AnsType {
-		patient, doctor, assistant;
+	public List<Conversation> getConversationList() {
+		return conversationList;
 	}
 
-	public AnsType getType() {
-		return type;
+	public void setConversationList(List<Conversation> conversationList) {
+		this.conversationList = conversationList;
 	}
 
-	public void setType(AnsType type) {
-		this.type = type;
-	}
-
-	public String getImg() {
-		return img;
-	}
-
-	public void setImg(String img) {
-		this.img = img;
-	}
-
-	public String getDate() {
-		return date;
-	}
-
-	public void setDate(String date) {
-		this.date = date;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public String getDoc() {
-		return doc;
-	}
-
-	public void setDoc(String doc) {
-		this.doc = doc;
-	}
-
-	public String getLevel() {
-		return level;
-	}
-
-	public void setLevel(String level) {
-		this.level = level;
-	}
-
-	public String getPatient() {
-		return patient;
-	}
-
-	public void setPatient(String patient) {
-		this.patient = patient;
-	}
-
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
-	}
 }

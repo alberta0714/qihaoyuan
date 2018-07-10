@@ -1,4 +1,4 @@
-package spider.main;
+package spider.haodf.main;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,27 +16,19 @@ import spider.main.beans.Qa;
 import spider.utils.DownLoadUtilsV2;
 import spider.utils.JobLogUtils;
 
-public class HaodfMain {
+public class HaodfHongYanMain {
 	static String cookies = "g=HDF.79.5b29c68b5a069; __jsluid=eae05e3a626cb3300ca144bb7d90b26c; UM_distinctid=1641b2f93a3704-0d818a8be07385-393d5f0e-100200-1641b2f93a42d0; _ga=GA1.2.1640071909.1529464461; sdmsg=1; newaskindex=1; userinfo[id]=2440151096; userinfo[name]=maggijhy; userinfo[ver]=1.0.2; userinfo[hosttype]=Doctor; userinfo[hostid]=1433501314; CNZZDATA1256706712=317343819-1529911477-https%253A%252F%252Fwww.haodf.com%252F%7C1530004233; CNZZDATA1915189=cnzz_eid%3D1316942010-1529462794-%26ntime%3D1531134171; userinfo[unreadcasecount]=10; _gid=GA1.2.566915156.1531135670; _gat=1; Hm_lvt_dfa5478034171cc641b1639b2a5b717d=1529979635,1530005512,1530152293,1531135670; userinfo[key]=BXhSYFxqA2cGbAM1CD8GZV8xBjNbbVB%2FUGhVM1dmDGYHOwRuVD4ELQUjATcIPlQ1B2oGP1pqWzlSNFBmBWcJLQ%3D%3D; userinfo[time]=1531135671; Hm_lpvt_dfa5478034171cc641b1639b2a5b717d=1531135686";
 	static DownLoadUtilsV2 spider = null;
 	static Charset charset = Charset.forName("UTF-8");
-	static JobLogUtils logger = new JobLogUtils(HaodfMain.class);
+	static JobLogUtils logger = new JobLogUtils(HaodfHongYanMain.class);
 
 	public static void main(String[] args) throws Exception {
 		spider = new DownLoadUtilsV2(new File("D:\\tmp\\haodf"), cookies).isWithImages(true).setSleep(1000);
 
-		spider.getHtmlDocumentWithCache("https://maggijhy.haodf.com/adminpatient/groupuser?groupId=2440156561&p_type=old&gp=1&shareType=&p=23", charset);
-//		String pageUri = "https://luodianzhong.haodf.com/zixun/list.htm?type=&p={page}";
-//		int pages = 118;
-//		for (int i = 1; i <= pages; i++) {
-//			String url = pageUri.replace("{page}", Integer.toString(i));
-//			Document doc = spider.getHtmlDocumentWithCache(url, charset);
-//			List<Qa> list = new ArrayList<Qa>();
-//			spiderPage(doc, list);
-//			// System.out.println(i);
-//			logger.info("spider page url {}, size:{}", url, list.size());
-//			break;// TODO unblock these lines
-//		}
+		Document doc = spider.getHtmlDocumentWithCache(
+				"https://maggijhy.haodf.com/adminpatient/groupuser?groupId=2440156561&p_type=old&gp=1&shareType=&p=23",
+				charset);
+		System.out.println(doc.text());
 	}
 
 	private static void spiderPage(Document doc, List<Qa> qaList) {
