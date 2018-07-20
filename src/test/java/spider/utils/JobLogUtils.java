@@ -88,7 +88,7 @@ public class JobLogUtils {
 		log.error(jobName + msg);
 	}
 
-	public void error(String format, Object arg) {
+	public void error(String format, Object... arg) {
 		log.error(jobName + format, arg);
 	}
 

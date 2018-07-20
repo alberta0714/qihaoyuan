@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
@@ -29,7 +30,7 @@ import spider.main.ParseCookies;
 
 public class DownLoadUtilsV2 {
 	JobLogUtils log = new JobLogUtils("job", DownLoadUtilsV2.class);
-	
+
 	private File tmpDir = null;// default
 	private File imgDir = null;// default
 	boolean isWithImages = false;
@@ -163,6 +164,9 @@ public class DownLoadUtilsV2 {
 	}
 
 	private byte[] getResponseBodyByJsoup(String itemUrl) throws IOException {
+		if(itemUrl==null || StringUtils.isEmpty(itemUrl)) {
+			return null;
+		}
 		log.info("正在下载: {}", itemUrl);
 		Connection conn = Jsoup.connect(itemUrl);
 		conn.ignoreContentType(true);
@@ -192,16 +196,16 @@ public class DownLoadUtilsV2 {
 		if (contentType != null && contentType.toLowerCase().contains("text") && isWithImages) {
 			Document doc = response.parse();
 			this.changeImgSrc(doc);
+			if (sleep > 0) {
+				try {
+					Thread.sleep(sleep);
+				} catch (Exception e) {
+					log.error("", e);
+				}
+			}
 			return doc.outerHtml().getBytes();
 		} else {
 			log.info("contentType:{}", contentType);
-		}
-		if (sleep > 0) {
-			try {
-				Thread.sleep(sleep);
-			} catch (Exception e) {
-				log.error("", e);
-			}
 		}
 		return response.bodyAsBytes();
 	}
@@ -212,7 +216,10 @@ public class DownLoadUtilsV2 {
 			try {
 				// img.attr("src","");
 				String imgUrl = img.attr("src");
-
+				// FIXME 特殊处理
+				if (imgUrl.contains("_100_100_1.jpg")) {
+					imgUrl = imgUrl.replace("_100_100_1.jpg", ".jpg");
+				}
 				String imgMd5 = null;
 				try {
 					imgMd5 = MD5Util.getEncryptedPwd(imgUrl);
@@ -221,10 +228,15 @@ public class DownLoadUtilsV2 {
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
-				if (imgUrl.contains("?")) {
-					imgUrl = imgUrl.substring(0, imgUrl.lastIndexOf("?"));
+				String fileSuffix = "";
+				if (imgUrl.contains(".")) {
+					if (imgUrl.contains("?")) {
+						fileSuffix = imgUrl.substring(imgUrl.lastIndexOf("."), imgUrl.lastIndexOf("?"));
+					} else {
+						fileSuffix = imgUrl.substring(imgUrl.lastIndexOf("."), imgUrl.length());
+					}
 				}
-				imgMd5 += imgUrl.substring(imgUrl.lastIndexOf("."), imgUrl.length());
+				imgMd5 += fileSuffix;
 				File imgTmp = new File(new File(new File(this.imgDir, imgMd5.substring(0, 2)), imgMd5.substring(2, 4)),
 						imgMd5);
 				this.downLoadToTmpFile(imgUrl, imgTmp);
