@@ -27,7 +27,7 @@ import spider.utils.DownLoadUtilsV2;
 import spider.utils.JobLogUtils;
 
 public class HaodfHongYanMain {
-	static String cookies = "g=HDF.79.5b29c68b5a069; UM_distinctid=1641b2f93a3704-0d818a8be07385-393d5f0e-100200-1641b2f93a42d0; _ga=GA1.2.1640071909.1529464461; sdmsg=1; newaskindex=1; userinfo[id]=2440151096; userinfo[name]=maggijhy; userinfo[ver]=1.0.2; userinfo[hosttype]=Doctor; userinfo[hostid]=1433501314; __jsluid=67c6d0d0dce5d6c607403d449e464a69; _telorder_lastview_id=6398301038; CNZZDATA1256706712=598709849-1530004233-https%253A%252F%252Fwww.haodf.com%252F%7C1531219199; userinfo[unreadcasecount]=15; _gid=GA1.2.1194827880.1531913231; _gat=1; Hm_lvt_dfa5478034171cc641b1639b2a5b717d=1531137700,1531221204,1531307008,1531913231; Hm_lpvt_dfa5478034171cc641b1639b2a5b717d=1531913231; userinfo[key]=UC1QYlFnB2MFb1VjVWIBYlM9AzYFM1R7V29VMwAxXTcAPARuVD4BKAYgBzEBNwZnXzINNAc3VDYMagcxB2VceA%3D%3D; userinfo[time]=1531913232";
+	static String cookies = "g=HDF.79.5b29c68b5a069; UM_distinctid=1641b2f93a3704-0d818a8be07385-393d5f0e-100200-1641b2f93a42d0; _ga=GA1.2.1640071909.1529464461; sdmsg=1; newaskindex=1; userinfo[id]=2440151096; userinfo[name]=maggijhy; userinfo[ver]=1.0.2; userinfo[hosttype]=Doctor; userinfo[hostid]=1433501314; __jsluid=67c6d0d0dce5d6c607403d449e464a69; _telorder_lastview_id=6398301038; CNZZDATA1256706712=598709849-1530004233-https%253A%252F%252Fwww.haodf.com%252F%7C1532077819; userinfo[unreadcasecount]=12; _gid=GA1.2.977029647.1532308921; _gat=1; Hm_lvt_dfa5478034171cc641b1639b2a5b717d=1531307008,1531913231,1532078058,1532308921; Hm_lpvt_dfa5478034171cc641b1639b2a5b717d=1532308921; userinfo[key]=VShQYlRiUDRUPgk%2FUWZWNVQ6AzZSZFt0AzsGYFBhC2EBPQFrBW8HLldxBTMFMwJjUTxRaFRkBWdQNgcxBWdafg%3D%3D; userinfo[time]=1532308918";
 	static DownLoadUtilsV2 spider = null;
 	static Charset charset = Charset.forName("UTF-8");
 	static JobLogUtils logger = new JobLogUtils(HaodfHongYanMain.class);
@@ -43,13 +43,13 @@ public class HaodfHongYanMain {
 			list.add(pageBean);
 			String pageUrl = "https://maggijhy.haodf.com/adminpatient/signinpatient?shareType=&p={page}"
 					.replace("{page}", Integer.toString(i));
+			logger.info("======= 正在采集分页:" + pageUrl);
 			pageBean.setPageLink(pageUrl);
 			// logger.info(pageUrl);
 			processMainPage(pageBean, pageUrl);
 		}
 		//
-		System.exit(0);
-		
+
 		File data = new File(baseDir, "data");
 		if (!data.exists()) {
 			data.mkdirs();
@@ -74,8 +74,10 @@ public class HaodfHongYanMain {
 				StringBuffer baseInfo = new StringBuffer();
 				baseInfo.append(item.getUserName()).append("\t");
 				baseInfo.append(item.getBaseInfo()).append("\t");
-				baseInfo.append(item.getPatientProfile().getBirthDay()).append("\t");
-				baseInfo.append(item.getPatientProfile().getPhone()).append("\t");
+				if (item.getPatientProfile() != null) {
+					baseInfo.append(item.getPatientProfile().getBirthDay()).append("\t");
+					baseInfo.append(item.getPatientProfile().getPhone()).append("\t");
+				}
 				baseInfo.append(item.getDiseases()).append("\t");
 				FileUtils.write(baseInfoFile, baseInfo.toString());
 				// 病例
@@ -201,6 +203,7 @@ public class HaodfHongYanMain {
 				}
 				String link = item.getDetailLink();
 				String patientId = link.substring(link.lastIndexOf("=") + 1, link.length());
+				logger.info("患者详情:{}", link);
 				String uri = "https://maggijhy.haodf.com/adminpatient/patientupload?patientCaseId=&patientId="
 						+ patientId;
 				Document doc = spider.getHtmlDocumentWithCache(uri, charset);
@@ -212,11 +215,15 @@ public class HaodfHongYanMain {
 		// 进入病例
 		for (PageItem item : pageBean.getPageItemList()) {
 			PatientProfile pro = item.getPatientProfile();
+			if (pro == null) {
+				continue;
+			}
 			String link = pro.getCaseLink();
 			if (StringUtils.isEmpty(link)) {
 				continue;
 			}
 			try {
+				logger.info("正在采集病例:{}", link);
 				Document caseDoc = spider.getHtmlDocumentWithCache(link, charset);
 				Elements imgs = caseDoc.select(".picList").get(0).select("img");
 				List<String> caseLinkList = new ArrayList<String>();
@@ -235,6 +242,9 @@ public class HaodfHongYanMain {
 		// 抓取互动
 		for (PageItem item : pageBean.getPageItemList()) {
 			PatientProfile pro = item.getPatientProfile();
+			if (pro == null) {
+				continue;
+			}
 			String link = pro.getInteractLink();
 			if (StringUtils.isEmpty(link)) {
 				continue;
@@ -243,6 +253,7 @@ public class HaodfHongYanMain {
 			try {
 				List<InteractBean> list = new ArrayList<>();
 				item.setInterActList(list);
+				logger.info("采集互动:{}", link);
 				Document interActDoc = spider.getHtmlDocumentWithCache(link, charset);
 				Elements rows = interActDoc.select(".patient_case_con").select("table").get(0).select("tr");
 				for (int i = 1; i < rows.size(); i++) {

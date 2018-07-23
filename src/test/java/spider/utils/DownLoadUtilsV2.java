@@ -29,7 +29,7 @@ import spider.main.IgnoreSSL;
 import spider.main.ParseCookies;
 
 public class DownLoadUtilsV2 {
-	JobLogUtils log = new JobLogUtils("job", DownLoadUtilsV2.class);
+	JobLogUtils log = new JobLogUtils("job", DownLoadUtilsV2.class).colseLog();
 
 	private File tmpDir = null;// default
 	private File imgDir = null;// default
@@ -164,12 +164,14 @@ public class DownLoadUtilsV2 {
 	}
 
 	private byte[] getResponseBodyByJsoup(String itemUrl) throws IOException {
-		if(itemUrl==null || StringUtils.isEmpty(itemUrl)) {
+		if (itemUrl == null || StringUtils.isEmpty(itemUrl)) {
 			return null;
 		}
 		log.info("正在下载: {}", itemUrl);
 		Connection conn = Jsoup.connect(itemUrl);
 		conn.ignoreContentType(true);
+		conn.timeout(1000 * 60 * 10);
+		conn.maxBodySize(1024 * 1024 * 1024);
 		conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")//
 				.header("Accept-Encoding", "gzip, deflate, br")//
 				.header("Accept-Language", "en-US,en;q=0.9,zh;q=0.8,zh-CN;q=0.7")//
@@ -213,9 +215,11 @@ public class DownLoadUtilsV2 {
 	private void changeImgSrc(Element content) throws IOException {
 		Elements imgs = content.select("img");
 		for (Element img : imgs) {
+			String link = null;
 			try {
 				// img.attr("src","");
 				String imgUrl = img.attr("src");
+				link = imgUrl;
 				// FIXME 特殊处理
 				if (imgUrl.contains("_100_100_1.jpg")) {
 					imgUrl = imgUrl.replace("_100_100_1.jpg", ".jpg");
@@ -239,13 +243,14 @@ public class DownLoadUtilsV2 {
 				imgMd5 += fileSuffix;
 				File imgTmp = new File(new File(new File(this.imgDir, imgMd5.substring(0, 2)), imgMd5.substring(2, 4)),
 						imgMd5);
+				link = imgUrl;
 				this.downLoadToTmpFile(imgUrl, imgTmp);
 
 				String rPath = "." + imgTmp.getAbsolutePath().replace(this.imgDir.getParentFile().getAbsolutePath(), "")
 						.replace("\\", "/");
 				img.attr("src", rPath);
 			} catch (Exception e) {
-				log.error("", e);
+				log.error("{}", link, e);
 			}
 		}
 	}
