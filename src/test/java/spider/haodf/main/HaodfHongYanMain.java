@@ -49,7 +49,6 @@ public class HaodfHongYanMain {
 			processMainPage(pageBean, pageUrl);
 		}
 		//
-
 		File data = new File(baseDir, "data");
 		if (!data.exists()) {
 			data.mkdirs();
@@ -115,20 +114,22 @@ public class HaodfHongYanMain {
 				}
 			}
 		}
+		System.out.println("执行完毕!");
 	}
 
 	private static void buildExcel(List<InteractBean> interActList, File actDir) throws IOException {
 		for (InteractBean bean : interActList) {
+			File actFile = new File(actDir, filterCharByFileName(bean.getTitle()) + ".xls");
+			if (actFile.exists()) {
+				actFile.delete();
+			}
+			actFile.createNewFile();
 			HSSFWorkbook workbook = null;
+			HSSFSheet sheet1 = null;
 			try {
 				workbook = new HSSFWorkbook();
-				File actFile = new File(actDir, filterCharByFileName(bean.getTitle()) + ".xls");
-				if (actFile.exists()) {
-					actFile.delete();
-				}
-				actFile.createNewFile();
 
-				HSSFSheet sheet1 = workbook.createSheet("患者对话");
+				sheet1 = workbook.createSheet("患者对话");
 				HSSFCellStyle dataCellStyle = workbook.createCellStyle();
 				for (int i = 0; i < bean.getConversationList().size(); i++) {
 					Conversation qa = bean.getConversationList().get(i);
@@ -289,10 +290,15 @@ public class HaodfHongYanMain {
 	}
 
 	private static void spiderInteractList(InteractBean act) throws Exception {
-		Document doc = spider.getHtmlDocumentWithCache(act.getLink(), charset);
-		List<Conversation> list = new ArrayList<Conversation>();
-		act.setConversationList(list);
+		List<Conversation> list = act.getConversationList();
+		if (list == null) {
+			list = new ArrayList<Conversation>();
+			act.setConversationList(list);
+		}
+
+		Document doc = null;
 		try {
+			doc = spider.getHtmlDocumentWithCache(act.getLink(), charset);
 			Elements streams = doc.select(".pb20").get(0).select(".zzx_yh_stream");
 			try {
 				String title = doc.select(".clearfix.zzx_yh_h1 h1").text();
@@ -356,6 +362,36 @@ public class HaodfHongYanMain {
 				} catch (Exception e) {
 				}
 				list.add(con);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// 分页处理
+		spiderInteractListNextPages(act, doc);
+	}
+
+	private static void spiderInteractListNextPages(InteractBean act, Document doc) {
+		try {
+			Elements links = doc.select(".page_turn a");
+			if (links == null || links.size() == 0) {
+				return;
+			}
+			for (Element lk : links) {
+				if (lk.text().contains("上一页")) {
+					String href = lk.attr("href");
+					if (StringUtils.isEmpty(href)) {
+						continue;
+					}
+					if (href.startsWith("/")) {
+						href = "https://maggijhy.haodf.com" + href;
+					}
+					act.setLink(href);
+					logger.info("采集交互分页:" + act.getLink());
+					spiderInteractList(act);
+					break;
+				} else {
+					continue;
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
