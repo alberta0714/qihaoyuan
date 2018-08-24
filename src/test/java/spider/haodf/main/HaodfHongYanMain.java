@@ -17,9 +17,12 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.google.common.base.Stopwatch;
 
 import spider.haodf.bean.InteractBean;
 import spider.haodf.bean.PageItem;
@@ -36,9 +39,9 @@ public class HaodfHongYanMain {
 	static Charset charset = Charset.forName("UTF-8");
 	static JobLogUtils logger = new JobLogUtils(HaodfHongYanMain.class);
 	static File baseDir = new File("D:\\tmp\\haodf");
-	static boolean isDebug = true;
 
 	public static void main(String[] args) throws Exception {
+		Stopwatch wt = Stopwatch.createStarted();
 		spider = new DownLoadUtilsV2(baseDir, cookies).isWithImages(true).setSleep(1000);
 		List<PageListBean> list = new ArrayList<PageListBean>();
 		// int pages = 77;
@@ -119,7 +122,7 @@ public class HaodfHongYanMain {
 				}
 			}
 		}
-		System.out.println("执行完毕!");
+		System.out.println("执行完毕!" + wt);
 	}
 
 	private static void buildExcel(List<InteractBean> interActList, File actDir) throws IOException {
@@ -171,9 +174,6 @@ public class HaodfHongYanMain {
 					row.createCell(0).setCellValue(qa.getType().toString());
 					row.createCell(1).setCellValue(qa.getDate());
 					String content = qa.getContent();
-					// if(content.contains("img")) {
-					// System.out.println(content);
-					// }
 					// row.createCell(2).setCellValue(Jsoup.parse(content).outerHtml());
 					row.createCell(2).setCellValue(content);
 				}
@@ -366,6 +366,7 @@ public class HaodfHongYanMain {
 					}
 				}
 				con.setType(type);
+				// 过滤掉: 助理
 				if (type == AnsType.assistant) {
 					continue;
 				}
@@ -402,6 +403,51 @@ public class HaodfHongYanMain {
 					con.setImg(stream.select(".yh_l_pics").get(0).text());
 				} catch (Exception e) {
 				}
+				// 过滤掉: 感谢信, 通知 , 及转诊
+				Element filterElement = Jsoup.parse(con.getContent() == null ? "" : con.getContent());
+				try {
+					String content = filterElement.select("h3.h_s_cons_title.iconmails").get(0).outerHtml();
+					if (content.contains("感谢信")) {
+						continue;
+					}
+				} catch (Exception e) {
+				}
+				try {
+					String content = filterElement.select("h3.h_s_cons_title strong").get(0).outerHtml();
+					if (content.contains("大夫通知")) {
+						continue;
+					}
+				} catch (Exception e) {
+				}
+				try {
+					String content = filterElement.select("h3.h_s_cons_title.iconjia").get(0).outerHtml();
+					if (content.contains("转诊")) {
+						continue;
+					}
+				} catch (Exception e) {
+				}
+				String content = con.getContent();
+				if (content.contains("金鸿雁大夫通知")) {
+					System.out.println(">>>>>>>>>>>>>>>>>>>>>\n" + content);
+				}
+				if (content.contains("感谢信")) {
+					System.out.println(">>>>>>>>>>>>>>>>>>>>>\n" + content);
+				}
+				if (content.contains("转诊")) {
+					System.out.println(">>>>>>>>>>>>>>>>>>>>>\n" + content);
+				}
+				// 过滤内容中除了img之外的html标签
+				Pattern pattern = Pattern.compile("(?is)<img.*?>");
+				Matcher m = pattern.matcher(con.getContent());
+				while (m.find()) {
+					con.setContent(con.getContent().replace(m.group(),
+							m.group().replaceFirst("<", "&lt;").replace(">", "&gt;")));
+				}
+				con.setContent(Jsoup.parse(con.getContent() == null ? "" : con.getContent()).text().replace("&lt;", "<")
+						.replace("&gt;", ">"));
+				// if (con.getContent().contains("img")) {
+				// System.out.println(con.getContent());
+				// }
 				list.add(con);
 			}
 		} catch (Exception e) {
