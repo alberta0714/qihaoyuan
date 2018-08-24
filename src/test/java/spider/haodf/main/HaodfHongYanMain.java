@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -13,7 +17,6 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -23,6 +26,7 @@ import spider.haodf.bean.PageItem;
 import spider.haodf.bean.PageListBean;
 import spider.haodf.bean.PatientProfile;
 import spider.main.beans.Conversation;
+import spider.main.beans.Conversation.AnsType;
 import spider.utils.DownLoadUtilsV2;
 import spider.utils.JobLogUtils;
 
@@ -32,6 +36,7 @@ public class HaodfHongYanMain {
 	static Charset charset = Charset.forName("UTF-8");
 	static JobLogUtils logger = new JobLogUtils(HaodfHongYanMain.class);
 	static File baseDir = new File("D:\\tmp\\haodf");
+	static boolean isDebug = true;
 
 	public static void main(String[] args) throws Exception {
 		spider = new DownLoadUtilsV2(baseDir, cookies).isWithImages(true).setSleep(1000);
@@ -118,6 +123,9 @@ public class HaodfHongYanMain {
 	}
 
 	private static void buildExcel(List<InteractBean> interActList, File actDir) throws IOException {
+		if (CollectionUtils.isEmpty(interActList)) {
+			return;
+		}
 		for (InteractBean bean : interActList) {
 			File actFile = new File(actDir, filterCharByFileName(bean.getTitle()) + ".xls");
 			if (actFile.exists()) {
@@ -128,18 +136,46 @@ public class HaodfHongYanMain {
 			HSSFSheet sheet1 = null;
 			try {
 				workbook = new HSSFWorkbook();
-
 				sheet1 = workbook.createSheet("患者对话");
-				HSSFCellStyle dataCellStyle = workbook.createCellStyle();
-				for (int i = 0; i < bean.getConversationList().size(); i++) {
+				List<Conversation> conversationList = bean.getConversationList();
+
+				// XXX 修正日期 可以放到前面 处理
+				Pattern p = Pattern.compile(".*([0-9]{4}-[0-9]{2}-[0-9]{2}).*");
+				for (int i = 0; i < conversationList.size(); i++) {
 					Conversation qa = bean.getConversationList().get(i);
+					if (StringUtils.isNotEmpty(qa.getDate())) {
+						Matcher m = p.matcher(qa.getDate());
+						if (m.find()) {
+							qa.setDate(m.group(1));
+						}
+					}
+				}
+				// 排序
+				Collections.sort(conversationList, new Comparator<Conversation>() {
+					@Override
+					public int compare(Conversation o1, Conversation o2) {
+						if (StringUtils.isEmpty(o1.getDate()) || StringUtils.isEmpty(o2.getDate())) {
+							return 0;
+						}
+						return o2.getDate().compareTo(o1.getDate());
+					}
+				});
+
+				HSSFCellStyle dataCellStyle = workbook.createCellStyle();
+				for (int i = 0; i < conversationList.size(); i++) {
+					Conversation qa = conversationList.get(i);
+					// logger.info("conversation_{}:{}", i, qa.getDate());
 					HSSFRow row = sheet1.createRow(i);
 					row.setRowStyle(dataCellStyle);
 
 					row.createCell(0).setCellValue(qa.getType().toString());
 					row.createCell(1).setCellValue(qa.getDate());
 					String content = qa.getContent();
-					row.createCell(2).setCellValue(Jsoup.parse(content).text());
+					// if(content.contains("img")) {
+					// System.out.println(content);
+					// }
+					// row.createCell(2).setCellValue(Jsoup.parse(content).outerHtml());
+					row.createCell(2).setCellValue(content);
 				}
 				workbook.write(actFile);
 			} catch (Exception e) {
@@ -299,6 +335,7 @@ public class HaodfHongYanMain {
 		Document doc = null;
 		try {
 			doc = spider.getHtmlDocumentWithCache(act.getLink(), charset);
+			logger.info("互动页链接:" + act.getLink());
 			Elements streams = doc.select(".pb20").get(0).select(".zzx_yh_stream");
 			try {
 				String title = doc.select(".clearfix.zzx_yh_h1 h1").text();
@@ -313,21 +350,25 @@ public class HaodfHongYanMain {
 				String doctorName = null;
 				String state = null;
 				Conversation.AnsType type = Conversation.AnsType.assistant;
+
 				try {
-					doctorName = stream.select(".yh_l_doctor a").text();
+					doctorName = stream.select(".yh_l_doctor a").get(0).text();
 					type = Conversation.AnsType.doctor;
 					con.setDoc(doctorName);
 				} catch (Exception e) {
 				}
 				if (StringUtils.isEmpty(doctorName)) {
 					try {
-						state = stream.select(".yh_l_states span").text();
+						state = stream.select(".yh_l_states span").get(0).text();
 						type = Conversation.AnsType.patient;
 						con.setState(state);
 					} catch (Exception e) {
 					}
 				}
 				con.setType(type);
+				if (type == AnsType.assistant) {
+					continue;
+				}
 				try {
 					String content = stream.select(".h_s_cons_info").get(0).outerHtml();
 					act.setQuestion(content);
