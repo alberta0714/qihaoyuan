@@ -83,9 +83,10 @@ public class DownLoadUtils {
 		downLoadToTmpFile(itemUrl, tmp, false);
 	}
 
-	public void downLoadToTmpFile(String itemUrl, File tmp, boolean overWrite) {
+	public int downLoadToTmpFile(String itemUrl, File tmp, boolean overWrite) {
+		int code =-1;
 		if (!overWrite && tmp.exists()) {
-			return;
+			return code;
 		}
 		if (itemUrl.startsWith("//")) {
 			itemUrl = "http:" + itemUrl;
@@ -94,7 +95,7 @@ public class DownLoadUtils {
 			boolean mkdirs = tmp.getParentFile().mkdirs();
 			log.info("创建目录{} {}", mkdirs, tmp.getParentFile().getAbsolutePath());
 			if (!mkdirs) {
-				return;
+				return code;
 			}
 		}
 
@@ -104,9 +105,11 @@ public class DownLoadUtils {
 		HttpClient client = new HttpClient();
 		HttpMethod m = new GetMethod(itemUrl);
 		String uae = "Mozilla/5.0 (compatible; Baiduspider/2.0;+http://www.baidu.com/search/spider.html) ";
+		uae = "Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25";
 		m.setRequestHeader("User-Agent", uae);
+		m.setFollowRedirects(false);
 		try {
-			client.executeMethod(m);
+			code =  client.executeMethod(m);
 			bodyBytes = m.getResponseBody();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -118,8 +121,8 @@ public class DownLoadUtils {
 				e.printStackTrace();
 			}
 		}
-
-		if (bodyBytes != null) {
+		
+		if (bodyBytes != null && code==200) {
 			FileOutputStream fos = null;
 			try {
 				fos = new FileOutputStream(tmp);
@@ -135,6 +138,7 @@ public class DownLoadUtils {
 			}
 		}
 		log.info("下载完毕{}, 写入文件:{}", wt, tmp.getAbsolutePath());
+		return code;
 	}
 
 	public static void main(String[] args) {
