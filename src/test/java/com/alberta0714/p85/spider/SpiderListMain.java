@@ -14,7 +14,7 @@ import com.alberta0714.common.Constant;
 
 public class SpiderListMain {
 	public static final String userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0";
-	public static int min = 20986;// 113770 13747 105270
+	public static int min = 1;// 113770 13747 105270
 	public static int max = min + 10000;
 
 	public static void main(String[] args) throws InterruptedException {
