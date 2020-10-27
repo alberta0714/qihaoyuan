@@ -29,7 +29,7 @@ public class BirthDayMain {
 
         System.out.println("---");
         int jiaqi       = showAge("2020-07-08", "G鼠 邓祐丞(邓佳琪) 五月十八18:36 酉时"); //
-        int fuYanQiu    = showAge("2020-03-03", "G鼠 (付艳秋) 二月初十 ...03:12 ");//
+        int fuYanQiu    = showAge("2020-03-03", "G鼠 (付艳秋)【杜晓宇】 二月初十 ...03:12 ");//
         int houPei      = showAge("2019-11-24", "G猪 侯培 十月廿八 "); //
         int xinMeng     = showAge("2018-10-26", "G狗 辛逍洋 九月十八");//
         int wangfang    = showAge("2018-05-25", "G狗 张睿(王芳) 四月十一"); //
